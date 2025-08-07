@@ -11,8 +11,8 @@ from selenium.webdriver.common.by import By
 from seleniumbase import SB
 
 
-VELES_URL = 'https://veles.finance/share/tRlrW'
-AUTH_BY_GOOGLE = True
+VELES_URL = 'https://veles.finance/cabinet'
+
 
 def match_label_to_column(label_text):
     match label_text:
@@ -103,7 +103,7 @@ def open_veles_page(driver):
     wait.until(EC.presence_of_element_located((By.ID, 'googleAuth')))
 
     try:
-        if AUTH_BY_GOOGLE:
+        if credentials.AUTH_BY_GOOGLE:
             # часть со входом через гугл auth
             driver.find_element(By.ID, 'googleAuth').click()
             driver.type("#identifierId", credentials.GOOGLE_ACC)
@@ -123,7 +123,8 @@ def open_veles_page(driver):
             pass_input.send_keys(credentials.VELES_PASSWORD)
             enter_btn = driver.find_element(By.ID, 'submitButton')
             enter_btn.click()
-
+            time.sleep(5)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'logout')))
         return True
 
     except Exception as e:
@@ -273,27 +274,6 @@ def run_the_test():
                     df = pd.read_csv(results_file)
                     backtests_parsed_file_name = test_dir + '/results (parsed).csv'
                     parse_results(opera_driver, df, backtests_parsed_file_name)
-            print('Parsing is finished...')
-
-
-def only_parsing():
-
-    chrome_args = [
-        "--disable-sync",
-        "--disable-notifications",
-        "--no-default-browser-check",
-        "--no-first-run",
-        "--disable-infobars"
-        # "--incognito",
-        # f"--user-data-dir={profile_path}",
-        # f"--profile-directory={profile_name}"
-    ]
-    with SB(uc=True, browser_args=chrome_args) as opera_driver:
-        if open_veles_page(opera_driver):
-            opera_driver.maximize_window()
-            df = pd.read_csv('backtests.csv')
-            backtests_parsed_file_name = 'results (parsed).csv'
-            parse_results(opera_driver, df, backtests_parsed_file_name)
             print('Parsing is finished...')
 
 
