@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
 from seleniumbase import SB
 
 
-VELES_URL = 'https://veles.finance/cabinet'
+VELES_URL = 'https://veles.finance/share/hfJwh'
 
 
 def match_label_to_column(label_text):
@@ -83,11 +83,12 @@ def parse_results(driver, df, file_name_to_save):
                     gross = float(value)
 
             if mpu != 0:
-                df.at[i, 'RR_Ratio'] = str(-1 * round(gross / mpu, 2)) + ':1'
+                df.at[i, 'RR_Ratio'] = str(-1 * round(gross / mpu, 2))
 
             driver.find_element(By.XPATH, '//*[@id="app"]/main/section[4]/div[2]/ul/li[3]').click()
             time.sleep(2)
-            df.at[i, 'Max_Orders'] = driver.find_element(By.XPATH, '//*[@id="app"]/main/section[4]/div[2]/div/div/div[2]/div/div[2]/div[1]/div/div[18]/div/p').text
+            max_orders = driver.find_element(By.XPATH, '//*[@id="app"]/main/section[4]/div[2]/div/div/div[2]/div/div[2]/div[1]/div/div[18]/div/p').text
+            df.at[i, 'Max_Orders'] = max_orders.split('/')[0].strip()
             time.sleep(2)
 
         except Exception as e:
@@ -111,9 +112,6 @@ def open_veles_page(driver):
             driver.type("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input", credentials.GOOGLE_PASS)
             driver.click("#passwordNext > div > button")
             time.sleep(5)
-            driver.find_element(By.XPATH, '//*[@id="app"]/main/section[4]/div[2]/ul/li[3]').click()
-            time.sleep(2)
-            driver.find_element(By.CSS_SELECTOR, '#app > main > section.backtest-tabs > div.backtest-tabs-deals.backtest-tabs > div > div > div.table-wrapper > div > div.head > div:nth-child(18)').click()
             print('We are ready to start!')
         else:
             # часть со входом обычным
@@ -125,6 +123,12 @@ def open_veles_page(driver):
             enter_btn.click()
             time.sleep(5)
             wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'logout')))
+
+        # включаем сортировку по кол-ву ордеров
+        driver.find_element(By.XPATH, '//*[@id="app"]/main/section[4]/div[2]/ul/li[3]').click()
+        time.sleep(2)
+        driver.find_element(By.CSS_SELECTOR, '#app > main > section.backtest-tabs > div.backtest-tabs-deals.backtest-tabs > div > div > div.table-wrapper > div > div.head > div:nth-child(18)').click()
+
         return True
 
     except Exception as e:
@@ -137,6 +141,7 @@ def find_element(driver, by: str, value: str) -> WebElement:
     while not element:
         element= driver.find_element(by, value)
     return element
+
 
 def find_elements(driver, by: str, value: str) -> WebElement:
     elements: WebElement = None
