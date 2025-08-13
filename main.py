@@ -150,7 +150,7 @@ def find_elements(driver, by: str, value: str) -> WebElement:
     return elements
 
 
-def proceed_next_coin(coin, driver, strategy_url, strategy_name):
+def proceed_next_coin(coin, driver, strategy_url, strategy_name, strategy_shadows):
     # загружаем образец бота
     driver.get(strategy_url)
     WebDriverWait(driver, 20).until(
@@ -198,7 +198,9 @@ def proceed_next_coin(coin, driver, strategy_url, strategy_name):
         # Включаем тени в тесте (если выключены)
         shadows_label = find_element(driver, By.XPATH, "//div[@class='selects-wrapper']/label[contains(., 'Учитывать тени свечей (пессимистично)')]")
         shadows_checkbox = shadows_label.find_element(By.TAG_NAME, 'input')
-        if not shadows_checkbox.is_selected():
+        if (not shadows_checkbox.is_selected()) & (strategy_shadows == 'Y'):
+            shadows_label.find_element(By.CLASS_NAME, 'checkbox').click()
+        elif shadows_checkbox.is_selected() & (strategy_shadows == 'N'):
             shadows_label.find_element(By.CLASS_NAME, 'checkbox').click()
         time.sleep(1) #19
 
@@ -257,11 +259,12 @@ def run_the_test():
 
                     test_url = test['url']
                     strategy_name = test['strategy']
+                    use_shadows = test['shadows']
                     for coin_name in coins_list:
                         # тест для монеты по стратегии
                         tested_coins.append(coin_name)
                         try:
-                            backtest_link = proceed_next_coin(coin_name, opera_driver, test_url, strategy_name)
+                            backtest_link = proceed_next_coin(coin_name, opera_driver, test_url, strategy_name, use_shadows)
                         except Exception as e:
                             backtest_link = 'Error'
                         test_links.append(backtest_link)
