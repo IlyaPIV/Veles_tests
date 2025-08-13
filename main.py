@@ -189,9 +189,18 @@ def proceed_next_coin(coin, driver, strategy_url, strategy_name):
         time.sleep(3) #17
 
         # Убираем галочку "Публичный тест"
-        (find_element(driver, By.XPATH, "//div[@class='selects-wrapper']/label[contains(., 'Публичный тест')]/div[@class='checkbox']")
-                    .click() )
-        time.sleep(2) #19
+        public_test_label = find_element(driver, By.XPATH, "//div[@class='selects-wrapper']/label[contains(., 'Публичный тест')]")
+        public_test_checkbox = public_test_label.find_element(By.TAG_NAME, 'input')
+        if public_test_checkbox.is_selected():
+            public_test_label.find_element(By.CLASS_NAME, 'checkbox').click()
+        time.sleep(1) #18
+
+        # Включаем тени в тесте (если выключены)
+        shadows_label = find_element(driver, By.XPATH, "//div[@class='selects-wrapper']/label[contains(., 'Учитывать тени свечей (пессимистично)')]")
+        shadows_checkbox = shadows_label.find_element(By.TAG_NAME, 'input')
+        if not shadows_checkbox.is_selected():
+            shadows_label.find_element(By.CLASS_NAME, 'checkbox').click()
+        time.sleep(1) #19
 
         # Запускаем тест нажав на "Подтвердить" +22 sec
         (find_element(driver, By.XPATH, "//div[@class='popup-footer']//button")
